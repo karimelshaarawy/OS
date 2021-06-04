@@ -18,15 +18,19 @@ public class OSapp {
         while (myFile.hasNextLine()) {
             String data = myFile.nextLine();
             String[] tokens = data.split(" ");
+            //for(int i=0;i<tokens.length;i++)
+            //System.out.println(tokens[i]);
+
             boolean isInput=false;
             String input="";
-            if(tokens[2].equals("input")){
-                isInput=true;
-                Scanner sc=new Scanner(System.in);
-                input = sc.nextLine();
+            if (tokens.length>2) {
+                if (tokens[2].equals("input")) {
+                    isInput = true;
+                    Scanner sc = new Scanner(System.in);
+                    input = sc.nextLine();
 
+                }
             }
-
             // Handling different command cases
             switch (tokens[0]) {
                 case "print":
@@ -35,10 +39,8 @@ public class OSapp {
                     else if (memory.strings.containsKey(tokens[1]))
                         System.out.println(memory.strings.get(tokens[1]));
                     else
-                        throw new OSException("there is no such a value");
+                        System.out.println(tokens[1]);
 
-
-                    ;
                     break;
 
 
@@ -48,7 +50,7 @@ public class OSapp {
                     else
                         memory.strings.put(tokens[1],input);
                 }
-                else if (tokens[2].equals("readFile")){
+                else if (tokens.length>2 && tokens[2].equals("readFile")){
                     String fileText ="";
 
                     Scanner temp = readFile(memory.strings.get(tokens[3]));
@@ -61,10 +63,10 @@ public class OSapp {
 
 
                 }else{
-                    if(memory.strings.containsKey(tokens[2]))
-                        memory.strings.put(tokens[1],memory.strings.get(tokens[2]));
+                    if(isNumeric(tokens[2]))
+                        memory.integers.put(tokens[1],Integer.parseInt(tokens[2]));
                     else
-                        memory.integers.put(tokens[1],memory.integers.get(tokens[2]));
+                        memory.strings.put(tokens[1],tokens[2]);
                 }
 
                     break;
@@ -76,9 +78,9 @@ public class OSapp {
                     break;
 
                 case "writeFile":if(memory.strings.containsKey(tokens[2]))
-                                 writeFile(tokens[1],memory.strings.get(tokens[2]));
+                                 writeFile(memory.strings.get(tokens[1]),memory.strings.get(tokens[2]));
                 else
-                    writeFile(tokens[1],memory.integers.get(tokens[2]).toString());
+                    writeFile(memory.strings.get(tokens[1]),memory.integers.get(tokens[2]).toString());
 
                     break;
 
@@ -98,7 +100,7 @@ public class OSapp {
 
     public static Scanner readFile(String filePath) {
 
-        File myObj = new File("filename.txt");
+        File myObj = new File(filePath);
         Scanner myReader = null;
         try {
             myReader = new Scanner(myObj);
@@ -113,8 +115,9 @@ public class OSapp {
 
     public static void writeFile(String filePath, String data) {
         try {
-            FileWriter myWriter = new FileWriter(filePath);
+            FileWriter myWriter = new FileWriter(filePath,false);
             myWriter.write(data);
+            myWriter.flush();
             myWriter.close();
             System.out.println("Successfully wrote to the file.");
         } catch (IOException e) {
@@ -141,4 +144,12 @@ public class OSapp {
         return true;
 
     }
+
+    public static void main (String[] args) throws OSException {
+        OSapp app =new OSapp();
+        app.interpreter("src/data/Program 3.txt");
+
+    }
+
+
 }
