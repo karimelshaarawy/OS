@@ -17,6 +17,7 @@ public void pcbIntializer(String filePath,Vector<int[]>boundaries){
         int pcbID=Integer.parseInt(getProgramName(filePath));
         PCB pcb=new PCB(pcbID,State.NEW,boundaries.get(pcbID-1)[0],boundaries.get(pcbID-1));
         memory.assignPCB(pcb);
+        System.out.println(pcb);
 }
 public void stateChanger(PCB pcb){
         for(int i=0;i<10;i++) {
@@ -52,6 +53,7 @@ public void programAssign(String[] filePath){
             for (int j = 30; j < 50; j++) {
                 if (memory.MemoryArray[j] == null) {
                     memory.MemoryArray[j] = data;
+                    System.out.println("line of code:  "+data+"  Memory Index: "+ j);
                     break;
                 }
             }
@@ -107,6 +109,22 @@ public void programAssign(String[] filePath){
 
     public void scheduler(String[] filePath) throws OSException {
         programAssign(filePath);
+        boolean printFlag=false;
+        int[]noOfLines=new int[filePath.length];
+
+        int x=0;
+        for (int i = 30; i <50; i++) {
+
+            if(memory.MemoryArray[i]!=null){
+                if(memory.MemoryArray[i]=="endProgram")
+                    x++;
+                else {
+                    noOfLines[x]++;
+                }
+            }
+
+        }
+
         for (int i = 0; i < 10; i++) {
             if(memory.MemoryArray[i]!=null){
                 stateChanger((PCB)memory.MemoryArray[i]);
@@ -129,16 +147,23 @@ public void programAssign(String[] filePath){
                     stateChanger(((PCB) (memory.MemoryArray[noProgramsChecker])));
                     noProgramsChecker=switchProgramChecker(noProgramsChecker,noPrograms);
                     state=false;
+                    printFlag=false;
                 }
             }
                 if (memory.MemoryArray[((PCB) (memory.MemoryArray[noProgramsChecker])).programCounter] == "endProgram") {
                     ((PCB) (memory.MemoryArray[noProgramsChecker])).programState=State.FINISHED;
+                    System.out.println("Program "+(noProgramsChecker+1)+" finished execution");
+                    System.out.println("Number of quanta ran: "+noOfLines[noProgramsChecker]);
                     instructions++;
                 } else {
                     if (memory.MemoryArray[((PCB) (memory.MemoryArray[noProgramsChecker])).programCounter] != null) {
                         if(state==false){
                             stateChanger(((PCB) (memory.MemoryArray[noProgramsChecker])));
                             state=true;
+                        }
+                        if(printFlag==false) {
+                            printFlag = true;
+                            System.out.println("Program ID of program to be executed:  " + (noProgramsChecker + 1));
                         }
                         interpreter(memory.MemoryArray[((PCB) (memory.MemoryArray[noProgramsChecker])).programCounter].toString(), filePath[noProgramsChecker]);
                         ((PCB) (memory.MemoryArray[noProgramsChecker])).programCounter++;
@@ -149,6 +174,8 @@ public void programAssign(String[] filePath){
                 }
             }
         ((PCB) (memory.MemoryArray[noProgramsChecker])).programState=State.FINISHED;
+        System.out.println("Program "+(noProgramsChecker+1)+" finished execution");
+        System.out.println("Number of quanta ran: "+noOfLines[noProgramsChecker]);
         }
 
     public void interpreter(String data,String filePath) throws OSException {
@@ -176,7 +203,8 @@ public void programAssign(String[] filePath){
                     boolean variableChecker=false;
                     for(int i=10;i<20;i++){
                         if((tokens[1]+getProgramName(filePath)).equals(memory.MemoryArray[i])){
-                            System.out.print(memory.MemoryArray[i+10]);
+                           System.out.println("Memory index of printed data: "+(i+10));
+                            System.out.println(memory.MemoryArray[i+10]);
                             variableChecker=true;
                             break;
                         }
@@ -198,8 +226,11 @@ public void programAssign(String[] filePath){
                     if(isInput){
                         for(int i=10;i<memory.MemoryArray.length;i++){
                             if(memory.MemoryArray[i]==null){
+
                                 memory.MemoryArray[i] = tokens[1];
                                 memory.MemoryArray[i+10] = input;
+                                System.out.println("Memory Index of written data "+(i+10));
+                                System.out.println(("Written data: "+ memory.MemoryArray[i+10]));
                                 break;
                             }
                         }
@@ -210,6 +241,8 @@ public void programAssign(String[] filePath){
                        for(int i=10;i<20;i++){
                            if(tokens[3].equals(memory.MemoryArray[i])){
                                readData=(String)memory.MemoryArray[i+10];
+                               System.out.println("Memory Index of read data "+(i+10));
+                               System.out.println(("Read data: "+ memory.MemoryArray[i+10]));
                                break;
                            }
                        }
@@ -222,6 +255,8 @@ public void programAssign(String[] filePath){
                             if(memory.MemoryArray[i]==null){
                                 memory.MemoryArray[i]=tokens[1];
                                 memory.MemoryArray[i+10]=fileText;
+                                System.out.println("Memory Index of written data "+(i+10));
+                                System.out.println(("Written data: "+ memory.MemoryArray[i+10]));
                                 break;
 
                             }
@@ -238,6 +273,8 @@ public void programAssign(String[] filePath){
                     for(int i=10;i<20;i++){
                         if(tokens[1].equals(memory.MemoryArray[i])){
                             memory.MemoryArray[i+10]=add(tokens[1],tokens[2],memory.MemoryArray);
+                            System.out.println("Memory Index of written data after addition "+(i+10));
+                            System.out.println(("Written data: "+ memory.MemoryArray[i+10]));
                             break;
                         }
                     }
@@ -251,12 +288,16 @@ public void programAssign(String[] filePath){
                     for (int i = 10; i < 20; i++) {
                         if(tokens[2].equals(memory.MemoryArray[i])){
                             writeData=(String) memory.MemoryArray[i+10];
+                            System.out.println("Memory Index of read data (writeFile)"+(i+10));
+                            System.out.println(("read data: "+ memory.MemoryArray[i+10]));
                             break;
                         }
                     }
                     for (int i = 10; i <20 ; i++) {
                         if(tokens[1].equals(memory.MemoryArray[i])){
                             dataPath=(String)memory.MemoryArray[i+10];
+                            System.out.println("Memory Index of read data (datapath) "+(i+10));
+                            System.out.println(("Read data: "+ memory.MemoryArray[i+10]));
                             break;
                         }
                     }
